@@ -1,15 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-/*
- * LoginForm.java
- * Handles login for both Passenger and Admin roles
- */
-/*
- * LoginForm.java
- * Handles login for both Passenger and Admin roles
- */
 package ui;
 
 import models.User;
@@ -54,28 +42,35 @@ public class LoginForm extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(255, 255, 255, 100)); // slightly transparent white
+                g2.setColor(new Color(255, 255, 255, 90));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
                 g2.dispose();
             }
         };
         panel.setOpaque(false);
         panel.setBorder(new EmptyBorder(20, 40, 20, 40));
-        panel.setPreferredSize(new Dimension(400, 300));
+        panel.setPreferredSize(new Dimension(400, 350));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Logo
+        JLabel logoLabel = loadLogo("/resources/images/logo5.png", 80, 80);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(logoLabel, gbc);
+
         // Title
+        gbc.gridy = 1;
         JLabel title = new JLabel("SGR Train Ticket System Login");
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(Color.BLACK);
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         panel.add(title, gbc);
 
         // Username
-        gbc.gridy++; gbc.gridwidth = 1;
+        gbc.gridy = 2; gbc.gridwidth = 1; gbc.gridx = 0;
         JLabel lblUsername = new JLabel("Username:");
         lblUsername.setForeground(Color.BLACK);
         lblUsername.setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -93,7 +88,7 @@ public class LoginForm extends JFrame {
         panel.add(txtUsername, gbc);
 
         // Password
-        gbc.gridy++; gbc.gridx = 0;
+        gbc.gridy = 3; gbc.gridx = 0;
         JLabel lblPassword = new JLabel("Password:");
         lblPassword.setForeground(Color.BLACK);
         lblPassword.setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -122,7 +117,7 @@ public class LoginForm extends JFrame {
         group.add(rbPassenger);
         group.add(rbAdmin);
 
-        gbc.gridy++; gbc.gridx = 0;
+        gbc.gridy = 4; gbc.gridx = 0;
         panel.add(rbPassenger, gbc);
         gbc.gridx = 1;
         panel.add(rbAdmin, gbc);
@@ -131,7 +126,7 @@ public class LoginForm extends JFrame {
         JButton btnLogin = createStyledButton("Login");
         JButton btnSignup = createStyledButton("Sign Up");
 
-        gbc.gridy++; gbc.gridx = 0;
+        gbc.gridy = 5; gbc.gridx = 0;
         panel.add(btnLogin, gbc);
         gbc.gridx = 1;
         panel.add(btnSignup, gbc);
@@ -139,19 +134,21 @@ public class LoginForm extends JFrame {
         background.add(panel);
 
         // Actions
-        btnLogin.addActionListener(e -> {
-            login();
-            this.dispose(); // Dispose after login pressed
-        });
+        btnLogin.addActionListener(e -> login());
         btnSignup.addActionListener(e -> {
             new SignupForm().setVisible(true);
-            this.dispose(); // Dispose after opening signup
+            this.dispose();
         });
     }
 
     private void login() {
         String username = txtUsername.getText().trim();
         String password = new String(txtPassword.getPassword());
+
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         AuthenticationService authService = new AuthenticationService();
         try {
@@ -160,6 +157,7 @@ public class LoginForm extends JFrame {
                 JOptionPane.showMessageDialog(this, "Welcome " + username + "!");
                 if (rbPassenger.isSelected()) new PassengerDashboard(user).setVisible(true);
                 else if (rbAdmin.isSelected()) new AdminDashboard(user).setVisible(true);
+                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid login", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -179,10 +177,21 @@ public class LoginForm extends JFrame {
         }
     }
 
+    private JLabel loadLogo(String path, int width, int height) {
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(path));
+            Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new JLabel(new ImageIcon(scaled));
+        } catch (Exception e) {
+            System.err.println("⚠️ Logo not found: " + path);
+            return new JLabel();
+        }
+    }
+
     private JButton createStyledButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        btn.setBackground(new Color(30, 144, 255, 200)); // semi-transparent blue
+        btn.setBackground(new Color(30, 144, 255, 200));
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));

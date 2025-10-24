@@ -35,14 +35,7 @@ public class AdminDashboard extends JFrame {
         JMenuItem miExit = new JMenuItem("Exit");
         miExit.addActionListener(e -> System.exit(0));
         mFile.add(miExit);
-
-        JMenu mReports = new JMenu("Reports");
-        JMenuItem miBookings = new JMenuItem("Bookings Report (PDF)");
-        miBookings.addActionListener(e -> new ReportGenerator().generateBookingsReportPdf(this));
-        mReports.add(miBookings);
-
         menuBar.add(mFile);
-        menuBar.add(mReports);
         setJMenuBar(menuBar);
 
         // Buttons panel
@@ -63,13 +56,16 @@ public class AdminDashboard extends JFrame {
         JButton bRuns = subtleButton("Manage Train Runs");
         JButton bCoaches = subtleButton("Manage Coaches");
         JButton bFares = subtleButton("Manage Fares");
+        JButton bReports = subtleButton("Generate Reports");
 
+        // Position buttons
         gbc.gridx = 0; gbc.gridy = 0; buttonPanel.add(bStations, gbc);
         gbc.gridx = 1; gbc.gridy = 0; buttonPanel.add(bRoutes, gbc);
         gbc.gridx = 0; gbc.gridy = 1; buttonPanel.add(bTrains, gbc);
         gbc.gridx = 1; gbc.gridy = 1; buttonPanel.add(bRuns, gbc);
         gbc.gridx = 0; gbc.gridy = 2; buttonPanel.add(bCoaches, gbc);
         gbc.gridx = 1; gbc.gridy = 2; buttonPanel.add(bFares, gbc);
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; buttonPanel.add(bReports, gbc);
 
         bg.add(buttonPanel);
 
@@ -81,45 +77,55 @@ public class AdminDashboard extends JFrame {
         bCoaches.addActionListener(e -> new ManageCoachesUI().setVisible(true));
         bFares.addActionListener(e -> new ManageFaresUI().setVisible(true));
 
+        // ✅ New Reports button (opens modern AdminReportsFrame)
+        bReports.addActionListener(e -> {
+            try {
+                AdminReportsFrame reportsFrame = new AdminReportsFrame();
+                reportsFrame.setVisible(true);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Unable to open Reports: " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         // Responsive resize
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
-                resizeButtons(bStations, bRoutes, bTrains, bRuns, bCoaches, bFares);
+                resizeButtons(bStations, bRoutes, bTrains, bRuns, bCoaches, bFares, bReports);
             }
         });
     }
 
     private JButton subtleButton(String text) {
         JButton b = new JButton(text);
-        // Semi-transparent, subtle color
-        b.setBackground(new Color(120, 150, 200, 180));
+        // Modern semi-transparent color
+        b.setBackground(new Color(70, 130, 180, 200)); // Steel Blue tone
         b.setForeground(Color.WHITE);
         b.setFocusPainted(false);
-        b.setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
+        b.setBorder(BorderFactory.createEmptyBorder(14, 30, 14, 30));
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setUI(new RoundedButtonUI());
-        b.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        b.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
         // Hover effect
         b.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                b.setBackground(new Color(140, 170, 220, 200));
+                b.setBackground(new Color(100, 160, 220, 230));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                b.setBackground(new Color(120, 150, 200, 180));
+                b.setBackground(new Color(70, 130, 180, 200));
             }
         });
-
         return b;
     }
 
     private void resizeButtons(JButton... buttons) {
         int width = getWidth();
         int height = getHeight();
-
-        int btnWidth = Math.max(200, width / 3);
+        int btnWidth = Math.max(220, width / 3);
         int btnHeight = Math.max(100, height / 5);
-        int fontSize = Math.max(16, btnHeight / 6);
+        int fontSize = Math.max(18, btnHeight / 6);
 
         for (JButton b : buttons) {
             b.setPreferredSize(new Dimension(btnWidth, btnHeight));

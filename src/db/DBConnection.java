@@ -10,12 +10,12 @@ import java.sql.SQLException;
 
 /**
  * DBConnection - single place to manage DB credentials.
- * Update USER and PASS to match your MySQL server.
+ * 
  */
 public class DBConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/train_ticket_db?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";        // <-- update
-    private static final String PASS = ""; // <-- update
+    private static final String USER = "root";        
+    private static final String PASS = ""; 
 
     static {
         try {

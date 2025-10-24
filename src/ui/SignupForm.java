@@ -13,7 +13,6 @@ import services.AuthenticationService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Properties;
@@ -42,14 +41,14 @@ public class SignupForm extends JFrame {
         ImagePanel bg = new ImagePanel("/resources/images/sign_up.jpg");
         bg.setLayout(new GridBagLayout());
 
-        // Form panel with rounded corners & slightly more transparent background
+        // Form panel with rounded corners
         JPanel formPanel = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(255, 255, 255, 160)); // slightly more transparent white
+                g2.setColor(new Color(255, 255, 255, 90)); // slightly darker (less transparent)
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
                 g2.dispose();
             }
@@ -65,7 +64,8 @@ public class SignupForm extends JFrame {
         p.put("text.year", "Year");
         JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
         datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-        datePicker.getComponent(0).setFont(fieldFont);
+        datePicker.setPreferredSize(new Dimension(200, 35));
+        datePicker.getJFormattedTextField().setPreferredSize(new Dimension(200, 35));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 15, 15, 15);
@@ -79,67 +79,46 @@ public class SignupForm extends JFrame {
         addField(formPanel, gbc, "Username:", txtUsername);
         addField(formPanel, gbc, "Password:", txtPassword);
 
-        // Register button
-        gbc.gridwidth = 2;
+        // Buttons row - Register (left), Back (right)
+        gbc.gridwidth = 1;
+        gbc.gridy++;
+
         JButton btnRegister = new JButton("Register");
-        btnRegister.setFont(buttonFont);
-        btnRegister.setBackground(new Color(0, 123, 255, 180)); // semi-transparent blue
-        btnRegister.setForeground(Color.WHITE);
-        btnRegister.setFocusPainted(false);
-        btnRegister.setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
-        btnRegister.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnRegister.setUI(new RoundedButtonUI());
+        styleButton(btnRegister, new Color(0, 123, 255, 200));
+        gbc.gridx = 0;
         formPanel.add(btnRegister, gbc);
+
+        JButton btnBack = new JButton("Back to Login");
+        styleButton(btnBack, new Color(220, 53, 69, 200));
+        gbc.gridx = 1;
+        formPanel.add(btnBack, gbc);
 
         bg.add(formPanel);
         setContentPane(bg);
 
+        // Actions
         btnRegister.addActionListener(e -> doRegister());
+        btnBack.addActionListener(e -> {
+            dispose();
+            new LoginForm().setVisible(true);
+        });
+
         setFonts(formPanel);
     }
 
     private void addField(JPanel panel, GridBagConstraints gbc, String labelText, JComponent field) {
         JLabel label = new JLabel(labelText);
         label.setFont(labelFont);
-        label.setForeground(Color.BLACK); // labels now black
+        label.setForeground(Color.BLACK);
+
         gbc.gridx = 0;
         panel.add(label, gbc);
 
-        if (field instanceof JTextField) {
-            ((JTextField) field).setFont(fieldFont);
-            ((JTextField) field).setOpaque(true);
-            ((JTextField) field).setBackground(new Color(255, 255, 255, 150)); // more transparent
-            ((JTextField) field).setForeground(Color.BLACK);
-            ((JTextField) field).setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(255,255,255,160),1,true),
-                    BorderFactory.createEmptyBorder(10,12,10,12)
-            ));
-        } else if (field instanceof JPasswordField) {
-            ((JPasswordField) field).setFont(fieldFont);
-            ((JPasswordField) field).setOpaque(true);
-            ((JPasswordField) field).setBackground(new Color(255, 255, 255, 150));
-            ((JPasswordField) field).setForeground(Color.BLACK);
-            ((JPasswordField) field).setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(255,255,255,160),1,true),
-                    BorderFactory.createEmptyBorder(10,12,10,12)
-            ));
-        } else if (field instanceof JComboBox) {
-            ((JComboBox<?>) field).setFont(fieldFont);
-            ((JComboBox<?>) field).setOpaque(true);
-            ((JComboBox<?>) field).setBackground(new Color(255, 255, 255, 150));
-            ((JComboBox<?>) field).setForeground(Color.BLACK);
-        } else if (field instanceof JDatePickerImpl) {
-            field.setFont(fieldFont);
-            field.setBackground(new Color(255, 255, 255, 150));
-            field.setForeground(Color.BLACK);
-            ((JDatePickerImpl) field).getJFormattedTextField().setOpaque(true);
-            ((JDatePickerImpl) field).getJFormattedTextField().setBackground(new Color(255, 255, 255, 150));
-            ((JDatePickerImpl) field).getJFormattedTextField().setForeground(Color.BLACK);
-            ((JDatePickerImpl) field).getJFormattedTextField().setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(255,255,255,160),1,true),
-                    BorderFactory.createEmptyBorder(10,12,10,12)
-            ));
-        }
+        field.setFont(fieldFont);
+        field.setPreferredSize(new Dimension(200, 35)); // ✅ keep fields large
+        field.setForeground(Color.BLACK);
+        field.setBackground(new Color(255, 255, 255, 150));
+        field.setOpaque(true);
 
         gbc.gridx = 1;
         panel.add(field, gbc);
@@ -151,6 +130,17 @@ public class SignupForm extends JFrame {
             if (c instanceof JLabel) c.setFont(labelFont);
             else if (c instanceof JTextField || c instanceof JPasswordField) c.setFont(fieldFont);
         }
+    }
+
+    private void styleButton(JButton btn, Color bg) {
+        btn.setFont(buttonFont);
+        btn.setPreferredSize(new Dimension(200, 45)); // ✅ same size for both buttons
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setUI(new RoundedButtonUI());
     }
 
     private void doRegister() {
@@ -190,6 +180,7 @@ public class SignupForm extends JFrame {
             auth.registerPassenger(username, password, full, gender, dob);
             JOptionPane.showMessageDialog(this, "Registration successful. Please login.");
             dispose();
+            new LoginForm().setVisible(true); // ✅ Redirect after success
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Registration failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
